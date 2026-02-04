@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-W19D2: Q-Learning Starter - Team Feature Branch Activity
+W19D2: Q-Learning Starter - Team 3 Feature Branch Activity
 =========================================================
 
 This is the BASE CODE that teams will fork and improve.
@@ -96,7 +96,7 @@ import matplotlib.pyplot as plt
 # =============================================================================
 
 # Student info - CHANGE THIS!
-STUDENT_NAME = "Your Name"
+STUDENT_NAME = "Team 3 - Jose Diaz, Stephanie Sookram, Raymond Lin, Sam Pomeroy"
 IMPROVEMENT_AREA = "None"  # Options: "Learning Rate", "Exploration", "State Bins", "Reward Shaping"
 
 # Random seed for reproducibility - DO NOT CHANGE for fair comparison!

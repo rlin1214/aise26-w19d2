@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Learning Results - Your Name</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #10b981;
+            --bg-dark: #111827;
+            --bg-card: #1f2937;
+            --text-primary: #f9fafb;
+            --text-secondary: #9ca3af;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header {
+            background: linear-gradient(135deg, #059669, #10b981);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        header h1 { margin: 0 0 10px 0; }
+        .info { color: rgba(255,255,255,0.8); }
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat {
+            background: #374151;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stat-label { color: var(--text-secondary); font-size: 0.85rem; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .chart-container { height: 300px; }
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .config-table td {
+            padding: 8px;
+            border-bottom: 1px solid #374151;
+        }
+        .config-table td:first-child { color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Q-Learning Results</h1>
+            <div class="info">
+                <strong>Your Name</strong> | Improvement: None<br>
+                Generated: 2026-02-03 18:00
+            </div>
+        </header>
+
+        <div class="card">
+            <h2>Evaluation Results</h2>
+            <div class="stats-grid">
+                <div class="stat">
+                    <div class="stat-label">Mean Score</div>
+                    <div class="stat-value">39.2</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Std Dev</div>
+                    <div class="stat-value">±9.9</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value">0%</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">Perfect Rate</div>
+                    <div class="stat-value">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Training Progress</h2>
+            <div class="chart-container">
+                <canvas id="trainingChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Evaluation Distribution</h2>
+            <div class="chart-container">
+                <canvas id="evalChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Configuration</h2>
+            <table class="config-table">
+                <tr><td>Learning Rate</td><td>0.2</td></tr>
+                <tr><td>Discount Factor</td><td>0.99</td></tr>
+                <tr><td>Epsilon Decay</td><td>0.995</td></tr>
+                <tr><td>Num Bins</td><td>12</td></tr>
+                <tr><td>Episodes</td><td>500</td></tr>
+                <tr><td>Training Time</td><td>13.6s</td></tr>
+                <tr><td>States Discovered</td><td>492</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Training chart
+        const trainingCtx = document.getElementById('trainingChart').getContext('2d');
+        const scores = [28.0, 8.0, 22.0, 11.0, 27.0, 23.0, 11.0, 10.0, 18.0, 20.0, 26.0, 10.0, 23.0, 14.0, 22.0, 15.0, 32.0, 10.0, 35.0, 23.0, 17.0, 12.0, 31.0, 19.0, 44.0, 17.0, 20.0, 23.0, 14.0, 14.0, 25.0, 16.0, 15.0, 17.0, 42.0, 28.0, 18.0, 26.0, 21.0, 18.0, 14.0, 25.0, 14.0, 18.0, 49.0, 20.0, 15.0, 11.0, 14.0, 12.0, 33.0, 14.0, 18.0, 34.0, 31.0, 51.0, 40.0, 18.0, 39.0, 20.0, 41.0, 18.0, 11.0, 22.0, 21.0, 37.0, 30.0, 13.0, 20.0, 17.0, 18.0, 30.0, 24.0, 23.0, 20.0, 18.0, 39.0, 27.0, 21.0, 15.0, 22.0, 15.0, 19.0, 21.0, 41.0, 36.0, 37.0, 20.0, 21.0, 19.0, 26.0, 31.0, 24.0, 16.0, 28.0, 59.0, 26.0, 20.0, 35.0, 11.0, 32.0, 26.0, 39.0, 17.0, 75.0, 30.0, 28.0, 15.0, 49.0, 14.0, 14.0, 38.0, 31.0, 15.0, 36.0, 19.0, 25.0, 44.0, 18.0, 25.0, 43.0, 20.0, 20.0, 32.0, 24.0, 32.0, 19.0, 16.0, 26.0, 30.0, 42.0, 17.0, 10.0, 24.0, 26.0, 33.0, 12.0, 16.0, 30.0, 29.0, 22.0, 19.0, 18.0, 18.0, 22.0, 44.0, 14.0, 17.0, 20.0, 10.0, 26.0, 17.0, 29.0, 22.0, 20.0, 20.0, 32.0, 16.0, 17.0, 40.0, 26.0, 16.0, 28.0, 68.0, 23.0, 22.0, 27.0, 26.0, 38.0, 21.0, 38.0, 23.0, 21.0, 24.0, 29.0, 20.0, 11.0, 8.0, 21.0, 26.0, 35.0, 40.0, 24.0, 18.0, 31.0, 26.0, 38.0, 10.0, 18.0, 18.0, 51.0, 27.0, 31.0, 17.0, 20.0, 22.0, 50.0, 24.0, 20.0, 25.0, 92.0, 20.0, 22.0, 23.0, 21.0, 35.0, 13.0, 13.0, 19.0, 21.0, 24.0, 18.0, 11.0, 31.0, 22.0, 17.0, 28.0, 21.0, 29.0, 15.0, 29.0, 18.0, 25.0, 24.0, 19.0, 17.0, 36.0, 22.0, 36.0, 27.0, 29.0, 16.0, 34.0, 14.0, 35.0, 24.0, 26.0, 19.0, 18.0, 21.0, 33.0, 22.0, 20.0, 21.0, 27.0, 16.0, 24.0, 22.0, 24.0, 33.0, 63.0, 21.0, 36.0, 24.0, 18.0, 51.0, 50.0, 14.0, 26.0, 29.0, 34.0, 28.0, 22.0, 26.0, 25.0, 27.0, 24.0, 12.0, 44.0, 31.0, 26.0, 33.0, 33.0, 28.0, 36.0, 24.0, 13.0, 23.0, 23.0, 47.0, 16.0, 25.0, 30.0, 32.0, 23.0, 28.0, 31.0, 25.0, 23.0, 48.0, 31.0, 30.0, 22.0, 27.0, 32.0, 29.0, 26.0, 26.0, 32.0, 27.0, 19.0, 20.0, 22.0, 30.0, 21.0, 27.0, 27.0, 32.0, 22.0, 47.0, 16.0, 29.0, 29.0, 31.0, 35.0, 21.0, 27.0, 29.0, 28.0, 26.0, 25.0, 20.0, 16.0, 31.0, 26.0, 20.0, 29.0, 29.0, 40.0, 31.0, 52.0, 25.0, 29.0, 30.0, 24.0, 35.0, 25.0, 49.0, 27.0, 26.0, 32.0, 30.0, 26.0, 30.0, 22.0, 40.0, 27.0, 27.0, 24.0, 29.0, 21.0, 29.0, 33.0, 31.0, 27.0, 31.0, 35.0, 56.0, 15.0, 46.0, 20.0, 48.0, 35.0, 30.0, 29.0, 26.0, 47.0, 46.0, 26.0, 19.0, 19.0, 49.0, 55.0, 29.0, 27.0, 31.0, 34.0, 29.0, 28.0, 38.0, 52.0, 30.0, 31.0, 54.0, 50.0, 26.0, 34.0, 37.0, 37.0, 41.0, 59.0, 29.0, 48.0, 58.0, 47.0, 47.0, 31.0, 33.0, 33.0, 31.0, 45.0, 28.0, 32.0, 39.0, 63.0, 54.0, 46.0, 20.0, 31.0, 28.0, 26.0, 36.0, 24.0, 24.0, 48.0, 27.0, 23.0, 34.0, 47.0, 43.0, 34.0, 25.0, 33.0, 37.0, 30.0, 33.0, 45.0, 44.0, 28.0, 52.0, 26.0, 54.0, 29.0, 27.0, 31.0, 44.0, 50.0, 18.0, 36.0, 30.0, 17.0, 39.0, 39.0, 32.0, 44.0, 37.0, 31.0, 39.0, 33.0, 58.0, 27.0, 31.0, 37.0, 35.0, 28.0, 25.0, 27.0, 47.0, 37.0, 39.0, 33.0, 36.0, 47.0, 14.0, 38.0, 36.0, 31.0, 41.0, 26.0, 35.0, 52.0, 39.0, 26.0, 30.0, 35.0, 50.0, 36.0, 10.0, 55.0, 27.0, 30.0, 36.0, 41.0, 24.0, 27.0, 62.0, 39.0, 24.0, 22.0, 23.0, 28.0, 30.0, 28.0, 32.0, 51.0, 31.0, 37.0, 31.0, 53.0, 58.0];
+        const episodes = scores.map((_, i) => i + 1);
+
+        // Calculate moving average
+        const movingAvg = scores.map((_, i) => {
+            const start = Math.max(0, i - 9);
+            const window = scores.slice(start, i + 1);
+            return window.reduce((a, b) => a + b, 0) / window.length;
+        });
+
+        new Chart(trainingCtx, {
+            type: 'line',
+            data: {
+                labels: episodes,
+                datasets: [
+                    {
+                        label: 'Episode Score',
+                        data: scores,
+                        borderColor: 'rgba(16, 185, 129, 0.3)',
+                        fill: false,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Moving Avg (10)',
+                        data: movingAvg,
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { min: 0, max: 550 }
+                }
+            }
+        });
+
+        // Evaluation histogram
+        const evalCtx = document.getElementById('evalChart').getContext('2d');
+        const evalScores = [34.0, 29.0, 32.0, 41.0, 50.0, 59.0, 59.0, 39.0, 58.0, 51.0, 33.0, 50.0, 55.0, 39.0, 33.0, 41.0, 33.0, 24.0, 33.0, 34.0, 53.0, 24.0, 41.0, 30.0, 59.0, 28.0, 54.0, 30.0, 39.0, 25.0, 37.0, 39.0, 26.0, 33.0, 33.0, 35.0, 37.0, 36.0, 39.0, 41.0, 32.0, 31.0, 35.0, 58.0, 51.0, 39.0, 37.0, 34.0, 35.0, 35.0, 24.0, 56.0, 36.0, 37.0, 43.0, 39.0, 39.0, 55.0, 34.0, 43.0, 35.0, 60.0, 35.0, 61.0, 51.0, 35.0, 26.0, 56.0, 29.0, 27.0, 53.0, 31.0, 35.0, 41.0, 29.0, 50.0, 28.0, 37.0, 32.0, 36.0, 37.0, 49.0, 33.0, 31.0, 37.0, 40.0, 36.0, 32.0, 33.0, 39.0, 61.0, 35.0, 57.0, 37.0, 34.0, 55.0, 34.0, 30.0, 28.0, 39.0];
+
+        // Create histogram bins
+        const bins = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
+        const counts = new Array(bins.length - 1).fill(0);
+        evalScores.forEach(score => {
+            for (let i = 0; i < bins.length - 1; i++) {
+                if (score >= bins[i] && score < bins[i + 1]) {
+                    counts[i]++;
+                    break;
+                }
+                if (i === bins.length - 2 && score >= bins[i + 1]) {
+                    counts[i]++;
+                }
+            }
+        });
+
+        new Chart(evalCtx, {
+            type: 'bar',
+            data: {
+                labels: bins.slice(0, -1).map((b, i) => `${b}-${bins[i+1]}`),
+                datasets: [{
+                    label: 'Episodes',
+                    data: counts,
+                    backgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+</body>
+</html>
